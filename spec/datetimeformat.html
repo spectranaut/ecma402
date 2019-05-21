@@ -312,9 +312,12 @@
               1. Let _v_ be _tm_.[[millisecond]].
               1. If _msd_ = 1, then
                 1. Let _v_ be ? floor(_v_ / 100).
-              1. If _msd_ = 2, then
+              1. Else if _msd_ = 2, then
                 1. Let _v_ be ? floor(_v_ / 10).
               1. Let _fs_ be the String consisting of the digits of the decimal representation of _v_.
+              1. Let _lfs_ be the length of _fs_.
+              1. Let _pz_ be the String consisting of 3 - _lfs_ occurrences of the character "0".
+              1. Let _fs_ be the concatenation _pz_ and _fs_.
               1. Append a new Record { [[Type]]: `"fractionalSecond"`, [[Value]]: _fs_ } as the last element of _result_.
           1. Else,
             1. Let _unknown_ be an implementation-, locale-, and numbering system-dependent String based on _x_ and _p_.
