@@ -105,6 +105,8 @@
           1. Let _prop_ be the name given in the Property column of the row.
           1. Let _value_ be ? GetOption(_options_, _prop_, `"string"`, &laquo; the strings given in the Values column of the row &raquo;, *undefined*).
           1. Set _opt_.[[&lt;_prop_&gt;]] to _value_.
+        1. If _opt_.[[Second]] is not *undefined*, then
+          1. Let _opt_.[[MillisecondDigits]] be ? GetNumberOption(_options_, `"millisecondDigits"`, 0, 3, 0).
         1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
         1. Let _formats_ be _dataLocaleData_.[[formats]].
         1. Let _matcher_ be ? GetOption(_options_, `"formatMatcher"`, `"string"`, &laquo; `"basic"`, `"best fit"` &raquo;, `"best fit"`).
@@ -117,6 +119,7 @@
           1. Let _p_ be _bestFormat_.[[&lt;_prop_&gt;]].
           1. If _p_ not *undefined*, then
             1. Set _dateTimeFormat_'s internal slot whose name is the Internal Slot column of the row to _p_.
+        1. Set _dateTimeFormat_.[[MillisecondDigits]] to _bestFormat_.[[MillisecondDigits]].
         1. If _dateTimeFormat_.[[Hour]] is not *undefined*, then
           1. Let _hcDefault_ be _dataLocaleData_.[[hourCycle]].
           1. Let _hc_ be _dateTimeFormat_.[[HourCycle]].
@@ -164,7 +167,7 @@
             1. Let _value_ be ? Get(_options_, _prop_).
             1. If _value_ is not *undefined*, let _needDefaults_ be *false*.
         1. If _required_ is `"time"` or `"any"`, then
-          1. For each of the property names `"hour"`, `"minute"`, `"second"`, do
+          1. For each of the property names `"hour"`, `"minute"`, `"second"`, `"millisecondDigits"`, do
             1. Let _prop_ be the property name.
             1. Let _value_ be ? Get(_options_, _prop_).
             1. If _value_ is not *undefined*, let _needDefaults_ be *false*.
@@ -303,6 +306,16 @@
             1. Else,
               1. Let _fv_ be an implementation and locale dependent String value representing `"ante meridiem"`.
             1. Add new part record { [[Type]]: `"dayPeriod"`, [[Value]]: _fv_ } as a new element of the list _result_.
+          1. Else if _p_ is equal to `"millisecond"`, then
+            1. Let _msd_ be _dateTimeFormat_.[[MillisecondDigits]].
+            1. If _msd_ > 0, then
+              1. Let _v_ be _tm_.[[millisecond]].
+              1. If _msd_ = 1, then
+                1. Let _v_ be ? floor(_v_ / 100).
+              1. If _msd_ = 2, then
+                1. Let _v_ be ? floor(_v_ / 10).
+              1. Let _fs_ be the String consisting of the digits of the decimal representation of _v_.
+              1. Append a new Record { [[Type]]: `"fractionalSecond"`, [[Value]]: _fs_ } as the last element of _result_.
           1. Else,
             1. Let _unknown_ be an implementation-, locale-, and numbering system-dependent String based on _x_ and _p_.
             1. Append a new Record { [[Type]]: `"unknown"`, [[Value]]: _unknown_ } as the last element of _result_.
@@ -371,8 +384,8 @@
       </p>
 
       <emu-alg>
-        1. Apply calendrical calculations on _date_ for the given _calendar_ and _timeZone_ to produce weekday, era, year, month, day, hour, minute, second, and inDST values. The calculations should use best available information about the specified _calendar_ and _timeZone_, including current and historical information about time zone offsets from UTC and daylight saving time rules. If the _calendar_ is `"gregory"`, then the calculations must match the algorithms specified in ES2020, <emu-xref href="#sec-overview-of-date-objects-and-definitions-of-abstract-operations"></emu-xref>.
-        1. Return a Record with fields [[weekday]], [[era]], [[year]], [[month]], [[day]], [[hour]], [[minute]], [[second]], and [[inDST]], each with the corresponding calculated value.
+        1. Apply calendrical calculations on _date_ for the given _calendar_ and _timeZone_ to produce weekday, era, year, month, day, hour, minute, second, millisecond, and inDST values. The calculations should use best available information about the specified _calendar_ and _timeZone_, including current and historical information about time zone offsets from UTC and daylight saving time rules. If the _calendar_ is `"gregory"`, then the calculations must match the algorithms specified in ES2020, <emu-xref href="#sec-overview-of-date-objects-and-definitions-of-abstract-operations"></emu-xref>.
+        1. Return a Record with fields [[weekday]], [[era]], [[year]], [[month]], [[day]], [[hour]], [[minute]], [[second]], [[millisecond]], and [[inDST]], each with the corresponding calculated value.
       </emu-alg>
 
       <emu-note>
@@ -421,7 +434,7 @@
 
       <emu-alg>
         1. If NewTarget is *undefined*, let _newTarget_ be the active function object, else let _newTarget_ be NewTarget.
-        1. Let _dateTimeFormat_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%DateTimeFormatPrototype%"`, &laquo; [[InitializedDateTimeFormat]], [[Locale]], [[Calendar]], [[NumberingSystem]], [[TimeZone]], [[Weekday]], [[Era]], [[Year]], [[Month]], [[Day]], [[Hour]], [[Minute]], [[Second]], [[TimeZoneName]], [[HourCycle]], [[Pattern]], [[BoundFormat]] &raquo;).
+        1. Let _dateTimeFormat_ be ? OrdinaryCreateFromConstructor(_newTarget_, `"%DateTimeFormatPrototype%"`, &laquo; [[InitializedDateTimeFormat]], [[Locale]], [[Calendar]], [[NumberingSystem]], [[TimeZone]], [[Weekday]], [[Era]], [[Year]], [[Month]], [[Day]], [[Hour]], [[Minute]], [[Second]], [[TimeZoneName]], [[HourCycle]], [[MillisecondDigits]], [[Pattern]], [[BoundFormat]] &raquo;).
         1. Perform ? InitializeDateTimeFormat(_dateTimeFormat_, _locales_, _options_).
       </emu-alg>
       <emu-normative-optional>
@@ -691,6 +704,10 @@
             <td>`"second"`</td>
           </tr>
           <tr>
+            <td>[[MillisecondDigits]]</td>
+            <td>`"millisecondDigits"`</td>
+          </tr>
+          <tr>
             <td>[[TimeZoneName]]</td>
             <td>`"timeZoneName"`</td>
           </tr>
@@ -732,6 +749,7 @@
       <li>[[NumberingSystem]] is a String value with the `"type"` given in Unicode Technical Standard 35 for the numbering system used for formatting.</li>
       <li>[[TimeZone]] is a String value with the IANA time zone name of the time zone used for formatting.</li>
       <li>[[Weekday]], [[Era]], [[Year]], [[Month]], [[Day]], [[Hour]], [[Minute]], [[Second]], [[TimeZoneName]] are each either *undefined*, indicating that the component is not used for formatting, or one of the String values given in <emu-xref href="#table-datetimeformat-components"></emu-xref>, indicating how the component should be presented in the formatted output.</li>
+      <li>[[MillisecondDigits]] is a non-negative integer Number value indicating the fraction digits to be used for franctional second. Numbers will be rounded or padded with trailing zeroes if necessary. </li>
       <li>[[HourCycle]] is a String value indicating whether the 12-hour format (`"h11"`, `"h12"`) or the 24-hour format (`"h23"`, `"h24"`) should be used. `"h11"` and `"h23"` start with hour 0 and go up to 11 and 23 respectively. `"h12"` and `"h24"` start with hour 1 and go up to 12 and 24. [[HourCycle]] is only used when [[Hour]] is not *undefined*.</li>
       <li>[[Pattern]] is a String value as described in <emu-xref href="#sec-intl.datetimeformat-internal-slots"></emu-xref>.</li>
     </ul>
