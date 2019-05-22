@@ -308,16 +308,17 @@
             1. Add new part record { [[Type]]: `"dayPeriod"`, [[Value]]: _fv_ } as a new element of the list _result_.
           1. Else if _p_ is equal to `"millisecond"`, then
             1. Let _msd_ be _dateTimeFormat_.[[MillisecondDigits]].
-            1. If _msd_ > 0, then
+            1. If _msd_ is greater than 0, then
               1. Let _v_ be _tm_.[[millisecond]].
               1. If _msd_ = 1, then
-                1. Let _v_ be ? floor(_v_ / 100).
+                1. Let _v_ be floor(_v_ / 100).
               1. Else if _msd_ = 2, then
-                1. Let _v_ be ? floor(_v_ / 10).
-              1. Let _fs_ be the String consisting of the digits of the decimal representation of _v_.
-              1. Let _lfs_ be the length of _fs_.
-              1. Let _pz_ be the String consisting of 3 - _lfs_ occurrences of the character "0".
-              1. Let _fs_ be the concatenation _pz_ and _fs_.
+                1. Let _v_ be floor(_v_ / 10).
+              1. Let _nf3Options_ be ObjectCreate(*null*).
+              1. Perform ! CreateDataPropertyOrThrow(_nf3Options_, `"minimumIntegerDigits"`, _msd_).
+              1. Perform ! CreateDataPropertyOrThrow(_nf3Options_, `"useGrouping"`, *false*).
+              1. Let _nf3_ be ? Construct(%NumberFormat%, &laquo; _locale_, _nf3Options_ &raquo;).
+              1. Let _fs_ be FormatNumber(_nf3_, _v_).
               1. Append a new Record { [[Type]]: `"fractionalSecond"`, [[Value]]: _fs_ } as the last element of _result_.
           1. Else,
             1. Let _unknown_ be an implementation-, locale-, and numbering system-dependent String based on _x_ and _p_.
