@@ -105,8 +105,7 @@
           1. Let _prop_ be the name given in the Property column of the row.
           1. Let _value_ be ? GetOption(_options_, _prop_, `"string"`, &laquo; the strings given in the Values column of the row &raquo;, *undefined*).
           1. Set _opt_.[[&lt;_prop_&gt;]] to _value_.
-        1. If _opt_.[[Second]] is not *undefined*, then
-          1. Let _opt_.[[MillisecondDigits]] be ? GetNumberOption(_options_, `"millisecondDigits"`, 0, 3, 0).
+        1. Let _opt_.[[MillisecondDigits]] be ? GetNumberOption(_options_, `"millisecondDigits"`, 0, 3, 0).
         1. Let _dataLocaleData_ be _localeData_.[[&lt;_dataLocale_&gt;]].
         1. Let _formats_ be _dataLocaleData_.[[formats]].
         1. Let _matcher_ be ? GetOption(_options_, `"formatMatcher"`, `"string"`, &laquo; `"basic"`, `"best fit"` &raquo;, `"best fit"`).
